@@ -2,3 +2,4 @@
 
 # We want to ignore the midi files we're training on:
 midis/
+allMusic.npz
