@@ -18,20 +18,43 @@ import numpy as np
 import os
 import pretty_midi
 
+# where we've got our midis
+midisDirectory = "midis"
 
-if __name__ == "__main__":
+
+def numpyFromFile(filename):
+    """
+    Given a filename, return the piano roll for that midi file, in numpy format
+    """
+    pm = pretty_midi.PrettyMIDI(filename)
+    pr = pm.get_piano_roll()
+    return pr
+
+
+def walk():
+    """
+    Walk through our midi files and return a big numpy array of all their data
+    """
+
+    if not os.path.isdir(midisDirectory):
+        raise Exception(f"No directory found at {midisDirectory}")
+
     list_of_files = {}
-    for dirpath, dirnames, filenames in os.walk("midis"):
+    for dirpath, _, filenames in os.walk(midisDirectory):
         for filename in filenames:
             if filename.endswith(".mid"):
                 list_of_files[filename] = os.sep.join([dirpath, filename])
 
     allMusic = []
-    for k, v in list_of_files.items():
-        pm = pretty_midi.PrettyMIDI(v)
-        pr = pm.get_piano_roll()
+    for _, v in list_of_files.items():
+        pr = numpyFromFile(v)
         allMusic.append(pr)
-        print(pr.shape)
+        # print(pr.shape)
     allMusic = np.concatenate(allMusic, axis=1)
+    return allMusic
+
+
+if __name__ == "__main__":
+    allMusic = walk()
     np.savez_compressed("allMusic.npz", allMusic)
     print(f"all music: {allMusic.shape}")
