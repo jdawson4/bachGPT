@@ -1,0 +1,4 @@
+# Author: Jacob Dawson
+
+# We want to ignore the midi files we're training on:
+midis/
