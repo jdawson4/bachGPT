@@ -43,7 +43,7 @@ def trainLoop():
 
     model.compile(
         keras.optimizers.Adam(learning_rate=learnRate,beta_1=momentum),
-        loss=tf.keras.losses.CategoricalCrossentropy(),
+        loss=tf.keras.losses.MeanSquaredError(),
         metrics=["accuracy"],
     )
 
