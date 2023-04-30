@@ -10,7 +10,10 @@ from tensorflow import keras
 
 seed = 7
 timestepsPerBatch = 1024
-batchSize = 64
+batchSize = 256
+learnRate = 0.001
+momentum = 0.9
+epochInterval = 5
 
 
 def attnLayer(

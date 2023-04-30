@@ -19,8 +19,8 @@ def loadData():
 
     # split data up into batches
     batchedData = []
-    for i in range(0, batchSize * (musicData.shape[0] // batchSize), batchSize):
-        batchedData.append(musicData[i : i + batchSize, :])
+    for i in range(0, timestepsPerBatch * (musicData.shape[0] // timestepsPerBatch), timestepsPerBatch):
+        batchedData.append(musicData[i : i + timestepsPerBatch, :])
     batchedData = np.array(batchedData, dtype=musicData.dtype)
     # print(musicData.shape)
     # print(batchedData.shape)
@@ -37,6 +37,40 @@ def loadData():
 
 def trainLoop():
     train, val = loadData()
+
+    model = attentionModel((timestepsPerBatch, 128))
+    model.summary()
+
+    model.compile(
+        keras.optimizers.Adam(learning_rate=learnRate,beta_1=momentum),
+        loss=keras.losses.MeanSquaredError(),
+        metrics=["accuracy"],
+    )
+
+    ckptsDir = "ckpts"
+    if not os.path.isdir(ckptsDir):
+        os.mkdir(ckptsDir)
+
+    class EveryKCallback(keras.callbacks.Callback):
+        def __init__(self, epoch_interval=epochInterval):
+            self.epoch_interval = epoch_interval
+
+        def on_epoch_begin(self, epoch, logs=None):
+            if (epoch % self.epoch_interval) == 0:
+                self.model.save_weights(
+                    ckptsDir + "/ckpt" + str(epoch), overwrite=True, save_format="h5"
+                )
+                self.model.save("network", overwrite=True)
+
+    model.fit(
+        x=train,
+        y=val,
+        batch_size=batchSize,
+        epochs=100,
+        callbacks=EveryKCallback(),
+        validation_split=0.3,
+        shuffle=True,
+    )
 
 
 if __name__ == "__main__":

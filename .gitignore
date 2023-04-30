@@ -6,3 +6,7 @@ __pycache__/
 # We want to ignore the midi files we're training on:
 midis/
 allMusic.npz
+
+# ignore the checkpoints and saved models:
+ckpts/
+network/
