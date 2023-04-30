@@ -20,6 +20,7 @@ import pretty_midi
 
 # where we've got our midis
 midisDirectory = "midis"
+storedDataDir = "allMusic.npz"
 
 
 def numpyFromFile(filename):
@@ -66,5 +67,5 @@ def walk():
 
 if __name__ == "__main__":
     allMusic = walk()
-    np.savez_compressed("allMusic.npz", allMusic)
+    np.savez_compressed(storedDataDir, a=allMusic)
     print(f"all music: {allMusic.shape}")
