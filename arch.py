@@ -9,6 +9,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 seed = 7
+batchSize = 1024
 
 
 def attnLayer(
@@ -42,7 +43,7 @@ def attnLayer(
     output = keras.layers.Activation("selu")(output)
     output = keras.layers.Dropout(dropout)(output)
 
-    return output
+    return keras.Model(inputs=input, outputs=output, name=f"block{layerCounter}")(input)
 
 
 def attentionModel(inputShape):
@@ -75,12 +76,12 @@ def attentionModel(inputShape):
     a10 = attnLayer(input=a9, layerCounter=layerCounter, kernelInit=init)
 
     output = keras.layers.Dense(
-        units=inputShape[2], activation=None, kernel_initializer=init
+        units=inputShape[1], activation=None, kernel_initializer=init
     )(a10)
 
     return keras.Model(inputs=input, outputs=output, name="attentionModel")
 
 
 if __name__ == "__main__":
-    model = attentionModel((None, 1024, 128))
+    model = attentionModel((batchSize, 128))
     model.summary()
