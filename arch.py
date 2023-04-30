@@ -9,7 +9,8 @@ import tensorflow as tf
 from tensorflow import keras
 
 seed = 7
-batchSize = 1024
+timestepsPerBatch = 1024
+batchSize = 64
 
 
 def attnLayer(
@@ -83,5 +84,5 @@ def attentionModel(inputShape):
 
 
 if __name__ == "__main__":
-    model = attentionModel((batchSize, 128))
+    model = attentionModel((timestepsPerBatch, 128))
     model.summary()
