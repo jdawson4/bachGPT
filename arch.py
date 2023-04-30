@@ -7,10 +7,11 @@
 
 import tensorflow as tf
 from tensorflow import keras
+import keras_nlp
 
 seed = 7
-timestepsPerBatch = 1024
-batchSize = 256
+timestepsPerBatch = 512
+batchSize = 32
 learnRate = 0.001
 momentum = 0.9
 epochInterval = 5
@@ -20,7 +21,7 @@ def attnLayer(
     input,
     kernelInit,
     layerCounter,
-    heads=8,
+    heads=4,
     kDim=32,
     out_shape=128,
     residual=True,
@@ -55,10 +56,14 @@ def attentionModel(inputShape):
     init = keras.initializers.RandomNormal(seed=seed)
 
     input = keras.layers.Input(shape=inputShape, dtype=tf.float32)
+    scale = keras.layers.Rescaling(1 / 300, offset=-1)(input)
+    embed = keras_nlp.layers.PositionEmbedding(timestepsPerBatch, initializer=init)(
+        scale
+    )
 
     layerCounter += 1
     a1 = attnLayer(
-        input=input, layerCounter=layerCounter, kernelInit=init, residual=False
+        input=embed, layerCounter=layerCounter, kernelInit=init, residual=False
     )
     layerCounter += 1
     a2 = attnLayer(input=a1, layerCounter=layerCounter, kernelInit=init, residual=False)
@@ -80,8 +85,9 @@ def attentionModel(inputShape):
     a10 = attnLayer(input=a9, layerCounter=layerCounter, kernelInit=init)
 
     output = keras.layers.Dense(
-        units=inputShape[1], activation=None, kernel_initializer=init
+        inputShape[1], activation="tanh", kernel_initializer=init
     )(a10)
+    output = keras.layers.Rescaling(300, offset=300)(output)
 
     return keras.Model(inputs=input, outputs=output, name="attentionModel")
 

@@ -43,7 +43,7 @@ def trainLoop():
 
     model.compile(
         keras.optimizers.Adam(learning_rate=learnRate,beta_1=momentum),
-        loss=keras.losses.MeanSquaredError(),
+        loss=tf.keras.losses.CategoricalCrossentropy(),
         metrics=["accuracy"],
     )
 
@@ -60,7 +60,7 @@ def trainLoop():
                 self.model.save_weights(
                     ckptsDir + "/ckpt" + str(epoch), overwrite=True, save_format="h5"
                 )
-                self.model.save("network", overwrite=True)
+                #self.model.save("network", overwrite=True)
 
     model.fit(
         x=train,
