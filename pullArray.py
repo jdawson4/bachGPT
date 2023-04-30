@@ -55,7 +55,11 @@ def walk():
     # for some reason, the music gets returned in the format (128, LENGTH).
     # I believe we actually want that in the format (LENGTH, 128).
     musicArr = [allMusic[:, i] for i in range(allMusic.shape[1])]
-    musicArr = np.array(musicArr)
+    musicArr = np.array(musicArr).astype(np.uint16)
+
+    print("Music data returned:")
+    print(f"type: {musicArr.dtype}")
+    print(f"min: {np.min(musicArr)}, max: {np.max(musicArr)}")
 
     return musicArr
 
