@@ -51,7 +51,13 @@ def walk():
         allMusic.append(pr)
         # print(pr.shape)
     allMusic = np.concatenate(allMusic, axis=1)
-    return allMusic
+
+    # for some reason, the music gets returned in the format (128, LENGTH).
+    # I believe we actually want that in the format (LENGTH, 128).
+    musicArr = [allMusic[:, i] for i in range(allMusic.shape[1])]
+    musicArr = np.array(musicArr)
+
+    return musicArr
 
 
 if __name__ == "__main__":
