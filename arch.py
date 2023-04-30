@@ -12,7 +12,7 @@ import keras_nlp
 seed = 7
 timestepsPerBatch = 512
 batchSize = 32
-learnRate = 0.001
+learnRate = 0.01
 momentum = 0.9
 epochInterval = 5
 
@@ -57,13 +57,13 @@ def attentionModel(inputShape):
 
     input = keras.layers.Input(shape=inputShape, dtype=tf.float32)
     scale = keras.layers.Rescaling(1 / 300, offset=-1)(input)
-    embed = keras_nlp.layers.PositionEmbedding(timestepsPerBatch, initializer=init)(
-        scale
-    )
+    # embed = keras_nlp.layers.PositionEmbedding(timestepsPerBatch, initializer=init)(
+    #    scale
+    # )
 
     layerCounter += 1
     a1 = attnLayer(
-        input=embed, layerCounter=layerCounter, kernelInit=init, residual=False
+        input=scale, layerCounter=layerCounter, kernelInit=init, residual=False
     )
     layerCounter += 1
     a2 = attnLayer(input=a1, layerCounter=layerCounter, kernelInit=init, residual=False)
