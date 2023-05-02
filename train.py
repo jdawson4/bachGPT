@@ -32,7 +32,7 @@ def loadData():
     # scale the values to between [-1,1]
     maxVal = np.max(batchedData)
     gc.collect()
-    batchedData = (batchedData / (maxVal/2)) - 1
+    batchedData = (batchedData / (maxVal / 2)) - 1
     batchedData = batchedData.astype(np.float16)
     # print(musicData.shape)
     # print(batchedData.shape)

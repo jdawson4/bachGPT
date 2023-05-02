@@ -53,10 +53,10 @@ def walk():
     for _, v in list_of_files.items():
         try:
             pr = numpyFromFile(v)
-        except (EOFError):
+        except EOFError:
             print("EOFError in " + v)
             continue
-        except (mido.KeySignatureError):
+        except mido.KeySignatureError:
             print("KeySignatureError in " + v)
             continue
         allMusic.append(pr.astype(np.uint16))
@@ -76,7 +76,7 @@ def walk():
     print(f"min: {np.min(musicArr)}, max: {np.max(musicArr)}")
     sum = 0
     for length in lengths:
-        sum+=length
+        sum += length
     avLength = sum / len(lengths)
     print(f"Average length of piano roll: {avLength}")
 

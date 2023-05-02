@@ -7,7 +7,8 @@
 
 import tensorflow as tf
 from tensorflow import keras
-#import keras_nlp
+
+# import keras_nlp
 
 seed = 7
 timestepsPerBatch = 512
@@ -57,7 +58,7 @@ def attentionModel(inputShape):
     init = keras.initializers.RandomNormal(seed=seed)
 
     input = keras.layers.Input(shape=inputShape, dtype=tf.float16)
-    #scale = keras.layers.Rescaling(1 / 300, offset=-1)(input)
+    # scale = keras.layers.Rescaling(1 / 300, offset=-1)(input)
     # embed = keras_nlp.layers.PositionEmbedding(timestepsPerBatch, initializer=init)(
     #    scale
     # )
@@ -88,7 +89,7 @@ def attentionModel(inputShape):
     output = keras.layers.Dense(
         inputShape[1], activation="tanh", kernel_initializer=init
     )(a10)
-    #output = keras.layers.Rescaling(300, offset=300)(output)
+    # output = keras.layers.Rescaling(300, offset=300)(output)
 
     return keras.Model(inputs=input, outputs=output, name="attentionModel")
 
