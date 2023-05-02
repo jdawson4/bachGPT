@@ -16,7 +16,9 @@
 # import mido # not needed but a cool library!
 import numpy as np
 import os
+import gc
 import pretty_midi
+import mido
 
 # where we've got our midis
 midisDirectory = "midis"
@@ -47,20 +49,36 @@ def walk():
                 list_of_files[filename] = os.sep.join([dirpath, filename])
 
     allMusic = []
+    lengths = []
     for _, v in list_of_files.items():
-        pr = numpyFromFile(v)
-        allMusic.append(pr)
+        try:
+            pr = numpyFromFile(v)
+        except (EOFError):
+            print("EOFError in " + v)
+            continue
+        except (mido.KeySignatureError):
+            print("KeySignatureError in " + v)
+            continue
+        allMusic.append(pr.astype(np.uint16))
+        lengths.append(pr.shape[1])
         # print(pr.shape)
+    gc.collect()
     allMusic = np.concatenate(allMusic, axis=1)
 
     # for some reason, the music gets returned in the format (128, LENGTH).
     # I believe we actually want that in the format (LENGTH, 128).
     musicArr = [allMusic[:, i] for i in range(allMusic.shape[1])]
     musicArr = np.array(musicArr).astype(np.uint16)
+    gc.collect()
 
     print("Music data returned:")
     print(f"type: {musicArr.dtype}")
     print(f"min: {np.min(musicArr)}, max: {np.max(musicArr)}")
+    sum = 0
+    for length in lengths:
+        sum+=length
+    avLength = sum / len(lengths)
+    print(f"Average length of piano roll: {avLength}")
 
     return musicArr
 

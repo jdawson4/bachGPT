@@ -7,6 +7,9 @@
 
 from arch import *
 from pullArray import *
+import gc
+
+keras.mixed_precision.set_global_policy("mixed_float16")
 
 
 def loadData():
@@ -25,7 +28,12 @@ def loadData():
         timestepsPerBatch,
     ):
         batchedData.append(musicData[i : i + timestepsPerBatch, :])
-    batchedData = np.array(batchedData, dtype=musicData.dtype)
+    batchedData = np.array(batchedData, dtype=np.float16)
+    # scale the values to between [-1,1]
+    maxVal = np.max(batchedData)
+    gc.collect()
+    batchedData = (batchedData / (maxVal/2)) - 1
+    batchedData = batchedData.astype(np.float16)
     # print(musicData.shape)
     # print(batchedData.shape)
     print(f"original size: {musicData.size}, batched size: {batchedData.size}")
@@ -36,11 +44,13 @@ def loadData():
 
     print(f"train shape: {train.shape}, val size: {val.shape}")
 
-    return train, val
+    gc.collect()
+
+    return train, val, maxVal
 
 
 def trainLoop():
-    train, val = loadData()
+    train, val, maxVal = loadData()
 
     model = attentionModel((timestepsPerBatch, 128))
     model.summary()
@@ -48,7 +58,7 @@ def trainLoop():
     model.compile(
         keras.optimizers.Adam(learning_rate=learnRate, beta_1=momentum),
         loss=tf.keras.losses.MeanSquaredError(),
-        metrics=["accuracy"],
+        metrics=["mae"],
     )
 
     ckptsDir = "ckpts"
@@ -66,11 +76,13 @@ def trainLoop():
                 )
                 # self.model.save("network", overwrite=True)
 
+    gc.collect()
+
     model.fit(
         x=train,
         y=val,
         batch_size=batchSize,
-        epochs=100,
+        epochs=epochs,
         callbacks=EveryKCallback(),
         validation_split=0.3,
         shuffle=True,
