@@ -23,15 +23,7 @@ from arch import *
 
 # where we've got our midis
 midisDirectory = "midis"
-
-if not os.path.isdir(midisDirectory):
-    raise Exception(f"No directory found at {midisDirectory}")
-
-list_of_files = {}
-for dirpath, _, filenames in os.walk(midisDirectory):
-    for filename in filenames:
-        if filename.endswith(".mid"):
-            list_of_files[filename] = os.sep.join([dirpath, filename])
+valMidisDirectory = "val_midis"
 
 
 def numpyFromFile(filename):
@@ -43,21 +35,30 @@ def numpyFromFile(filename):
     return pr
 
 
-def getNextMusicChunk():
+def getNextMusicChunk(directory=midisDirectory):
     """
     This is our generator. Using this, one can declare a dataset to iterate
     through our data without having to load the whole thing in RAM. Tradeoff:
     disk speed.
     """
 
+    if not os.path.isdir(directory):
+        raise Exception(f"No directory found at {directory}")
+
+    list_of_files = {}
+    for dirpath, _, filenames in os.walk(directory):
+        for filename in filenames:
+            if filename.endswith(".mid"):
+                list_of_files[filename] = os.sep.join([dirpath, filename])
+
     for _, v in list_of_files.items():
         try:
             pr = numpyFromFile(v)
         except EOFError:
-            print("EOFError in " + v)
+            # print("EOFError in " + v)
             continue
         except mido.KeySignatureError:
-            print("KeySignatureError in " + v)
+            # print("KeySignatureError in " + v)
             continue
 
         # need some light preprocessing:
@@ -83,7 +84,7 @@ def getNextMusicChunk():
             ]
 
 
-def determineSizeOfSet():
+def determineSizeOfSet(directory=midisDirectory):
     """
     this is a copy-paste of our generator, but instead of yielding, we
     determine the size of our training set
@@ -91,14 +92,23 @@ def determineSizeOfSet():
 
     size = 0
 
+    if not os.path.isdir(directory):
+        raise Exception(f"No directory found at {directory}")
+
+    list_of_files = {}
+    for dirpath, _, filenames in os.walk(directory):
+        for filename in filenames:
+            if filename.endswith(".mid"):
+                list_of_files[filename] = os.sep.join([dirpath, filename])
+
     for _, v in list_of_files.items():
         try:
             pr = numpyFromFile(v)
         except EOFError:
-            print("EOFError in " + v)
+            # print("EOFError in " + v)
             continue
         except mido.KeySignatureError:
-            print("KeySignatureError in " + v)
+            # print("KeySignatureError in " + v)
             continue
 
         # need some light preprocessing:
@@ -123,12 +133,19 @@ def determineSizeOfSet():
 
 
 if __name__ == "__main__":
-    returnSignature = tf.TensorSpec(shape=[2, timestepsPerBatch, 128], dtype=tf.float16)
+    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float16)
     dataset = (
         tf.data.Dataset.from_generator(
-            getNextMusicChunk, output_signature=returnSignature
+            getNextMusicChunk, output_signature=(returnSignature, returnSignature)
         )
         .apply(tf.data.experimental.assert_cardinality(datasetSize))
+        .prefetch(batchSize * 2)
+    )
+    valDataset = (
+        tf.data.Dataset.from_generator(
+            lambda: getNextMusicChunk(valMidisDirectory), output_signature=(returnSignature, returnSignature)
+        )
+        .apply(tf.data.experimental.assert_cardinality(valDatasetSize))
         .prefetch(batchSize * 2)
     )
 
@@ -142,7 +159,13 @@ if __name__ == "__main__":
         # if taking more than one, might be better to see range above threshold:
         # if np.max(allData) > 1:
         #    print("bigger than 1")
+    for x, y in valDataset.take(1):
+        allData = np.concatenate((x, y), -1)
+        print(f"val dataset returns: {allData.shape}")
 
     # see the whole size (note: only do this when determineSizeOfSet is updated)
-    # print(f"size of whole dataset: {determineSizeOfSet()}")
-    # size of whole dataset: 46581
+    # print(f"size of train dataset: {determineSizeOfSet(midisDirectory)}")
+    # size of whole dataset: 44898
+
+    # print(f"size of validation dataset: {determineSizeOfSet(valMidisDirectory)}")
+    # size of whole dataset: 1683

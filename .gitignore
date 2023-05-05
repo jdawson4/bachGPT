@@ -5,6 +5,7 @@ __pycache__/
 
 # We want to ignore the midi files we're training on:
 midis/
+val_midis/
 
 # ignore the checkpoints and saved models:
 ckpts/

@@ -12,12 +12,13 @@ from tensorflow import keras
 
 seed = 7
 timestepsPerBatch = 512
-batchSize = 16
-learnRate = 0.01
+batchSize = 64
+learnRate = 0.001
 momentum = 0.9
 epochInterval = 5
 epochs = 25
-datasetSize = 46500
+datasetSize = 44898
+valDatasetSize = 1683
 
 
 def attnLayer(

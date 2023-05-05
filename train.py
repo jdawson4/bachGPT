@@ -13,14 +13,24 @@ keras.mixed_precision.set_global_policy("mixed_float16")
 
 
 def trainLoop():
-    returnSignature = tf.TensorSpec(shape=[2, timestepsPerBatch, 128], dtype=tf.float16)
+    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float16)
     dataset = (
         tf.data.Dataset.from_generator(
-            getNextMusicChunk, output_signature=returnSignature
+            getNextMusicChunk, output_signature=(returnSignature, returnSignature)
         )
         .apply(tf.data.experimental.assert_cardinality(datasetSize))
         .prefetch(batchSize * 2)
     )
+    dataset = dataset.batch(batchSize)
+
+    valDataset = (
+        tf.data.Dataset.from_generator(
+            lambda: getNextMusicChunk(valMidisDirectory), output_signature=(returnSignature, returnSignature)
+        )
+        .apply(tf.data.experimental.assert_cardinality(valDatasetSize))
+        .prefetch(batchSize * 2)
+    )
+    valDataset = valDataset.batch(batchSize)
 
     model = attentionModel((timestepsPerBatch, 128))
     model.summary()
@@ -50,11 +60,10 @@ def trainLoop():
 
     model.fit(
         x=dataset,
-        batch_size=batchSize,
         epochs=epochs,
         callbacks=EveryKCallback(),
-        validation_split=0.3,
         shuffle=True,
+        validation_data=valDataset,
     )
 
 
