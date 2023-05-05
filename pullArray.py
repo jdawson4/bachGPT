@@ -16,13 +16,23 @@
 # import mido # not needed but a cool library!
 import numpy as np
 import os
-import gc
 import pretty_midi
 import mido
+import tensorflow as tf
+
+from arch import *
 
 # where we've got our midis
 midisDirectory = "midis"
-storedDataDir = "allMusic.npz"
+
+if not os.path.isdir(midisDirectory):
+    raise Exception(f"No directory found at {midisDirectory}")
+
+list_of_files = {}
+for dirpath, _, filenames in os.walk(midisDirectory):
+    for filename in filenames:
+        if filename.endswith(".mid"):
+            list_of_files[filename] = os.sep.join([dirpath, filename])
 
 
 def numpyFromFile(filename):
@@ -34,22 +44,7 @@ def numpyFromFile(filename):
     return pr
 
 
-def walk():
-    """
-    Walk through our midi files and return a big numpy array of all their data
-    """
-
-    if not os.path.isdir(midisDirectory):
-        raise Exception(f"No directory found at {midisDirectory}")
-
-    list_of_files = {}
-    for dirpath, _, filenames in os.walk(midisDirectory):
-        for filename in filenames:
-            if filename.endswith(".mid"):
-                list_of_files[filename] = os.sep.join([dirpath, filename])
-
-    allMusic = []
-    lengths = []
+def getNextMusicChunk():
     for _, v in list_of_files.items():
         try:
             pr = numpyFromFile(v)
@@ -59,31 +54,29 @@ def walk():
         except mido.KeySignatureError:
             print("KeySignatureError in " + v)
             continue
-        allMusic.append(pr.astype(np.uint16))
-        lengths.append(pr.shape[1])
-        # print(pr.shape)
-    gc.collect()
-    allMusic = np.concatenate(allMusic, axis=1)
-
-    # for some reason, the music gets returned in the format (128, LENGTH).
-    # I believe we actually want that in the format (LENGTH, 128).
-    musicArr = [allMusic[:, i] for i in range(allMusic.shape[1])]
-    musicArr = np.array(musicArr).astype(np.uint16)
-    gc.collect()
-
-    print("Music data returned:")
-    print(f"type: {musicArr.dtype}")
-    print(f"min: {np.min(musicArr)}, max: {np.max(musicArr)}")
-    sum = 0
-    for length in lengths:
-        sum += length
-    avLength = sum / len(lengths)
-    print(f"Average length of piano roll: {avLength}")
-
-    return musicArr
+        pr = np.swapaxes(pr, axis1=0, axis2=1)
+        # pr = (batchedData / (maxVal / 2)) - 1
+        pr = pr.astype(np.float16)
+        for i in range(
+            0,
+            (timestepsPerBatch * (pr.shape[0] // timestepsPerBatch))
+            - timestepsPerBatch,
+            timestepsPerBatch,
+        ):
+            yield pr[i : i + timestepsPerBatch, :], pr[
+                i + timestepsPerBatch : i + (2 * timestepsPerBatch), :
+            ]
 
 
 if __name__ == "__main__":
-    allMusic = walk()
-    np.savez_compressed(storedDataDir, a=allMusic)
-    print(f"all music: {allMusic.shape}")
+    returnSignature = tf.TensorSpec(shape=[2, timestepsPerBatch, 128], dtype=tf.float16)
+    dataset = (
+        tf.data.Dataset.from_generator(
+            getNextMusicChunk, output_signature=returnSignature
+        )
+        .apply(tf.data.experimental.assert_cardinality(numberOfBatches))
+        .prefetch(batchSize * 2)
+    )
+
+    for x,y in dataset.take(1):
+        print(f"x shape: {x.shape}, y shape: {y.shape}")

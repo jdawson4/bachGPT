@@ -12,45 +12,15 @@ import gc
 keras.mixed_precision.set_global_policy("mixed_float16")
 
 
-def loadData():
-    # load data from file, or walk:
-    if os.path.isfile(storedDataDir):
-        with np.load(storedDataDir) as data:
-            musicData = data["a"]
-    else:
-        musicData = walk()
-
-    # split data up into batches
-    batchedData = []
-    for i in range(
-        0,
-        timestepsPerBatch * (musicData.shape[0] // timestepsPerBatch),
-        timestepsPerBatch,
-    ):
-        batchedData.append(musicData[i : i + timestepsPerBatch, :])
-    batchedData = np.array(batchedData, dtype=np.float16)
-    # scale the values to between [-1,1]
-    maxVal = np.max(batchedData)
-    gc.collect()
-    batchedData = (batchedData / (maxVal / 2)) - 1
-    batchedData = batchedData.astype(np.float16)
-    # print(musicData.shape)
-    # print(batchedData.shape)
-    print(f"original size: {musicData.size}, batched size: {batchedData.size}")
-
-    # now that data is batched, split into train and val:
-    train = batchedData[0 : batchedData.shape[0] - 1 : 1, :, :]
-    val = batchedData[1 : batchedData.shape[0] : 1, :, :]
-
-    print(f"train shape: {train.shape}, val size: {val.shape}")
-
-    gc.collect()
-
-    return train, val, maxVal
-
-
 def trainLoop():
-    train, val, maxVal = loadData()
+    returnSignature = tf.TensorSpec(shape=[2, timestepsPerBatch, 128], dtype=tf.float16)
+    dataset = (
+        tf.data.Dataset.from_generator(
+            getNextMusicChunk, output_signature=returnSignature
+        )
+        .apply(tf.data.experimental.assert_cardinality(numberOfBatches))
+        .prefetch(batchSize * 2)
+    )
 
     model = attentionModel((timestepsPerBatch, 128))
     model.summary()
@@ -79,8 +49,7 @@ def trainLoop():
     gc.collect()
 
     model.fit(
-        x=train,
-        y=val,
+        x=dataset,
         batch_size=batchSize,
         epochs=epochs,
         callbacks=EveryKCallback(),
