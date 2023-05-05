@@ -67,6 +67,8 @@ def trainLoop():
         validation_data=valDataset,
     )
 
+    self.model.save_weights(ckptsDir + "/finished", overwrite=True, save_format="h5")
+
 
 if __name__ == "__main__":
     trainLoop()

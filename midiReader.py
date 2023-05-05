@@ -169,4 +169,4 @@ if __name__ == "__main__":
     # size of whole dataset: 44898
 
     # print(f"size of validation dataset: {determineSizeOfSet(valMidisDirectory)}")
-    # size of whole dataset: 1683
+    # size of validation dataset: 1683
