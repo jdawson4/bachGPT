@@ -18,7 +18,7 @@ def trainLoop():
         tf.data.Dataset.from_generator(
             getNextMusicChunk, output_signature=returnSignature
         )
-        .apply(tf.data.experimental.assert_cardinality(numberOfBatches))
+        .apply(tf.data.experimental.assert_cardinality(datasetSize))
         .prefetch(batchSize * 2)
     )
 

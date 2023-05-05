@@ -44,6 +44,12 @@ def numpyFromFile(filename):
 
 
 def getNextMusicChunk():
+    """
+    This is our generator. Using this, one can declare a dataset to iterate
+    through our data without having to load the whole thing in RAM. Tradeoff:
+    disk speed.
+    """
+
     for _, v in list_of_files.items():
         try:
             pr = numpyFromFile(v)
@@ -53,18 +59,67 @@ def getNextMusicChunk():
         except mido.KeySignatureError:
             print("KeySignatureError in " + v)
             continue
+
+        # need some light preprocessing:
+        # we want this organized in the shape [length, 128]
         pr = np.swapaxes(pr, axis1=0, axis2=1)
+        # not sure if this is the right scaling factor; do we want our inputs
+        # [-1,1] or [0,1]?
         pr = pr / 256
+        # let's also return as float16s
         pr = pr.astype(np.float16)
+
+        # we want to return x and y of a certain size, and offset from one
+        # another. We use yield for this, a function I was unfamiliar with!
         for i in range(
             0,
             (timestepsPerBatch * (pr.shape[0] // timestepsPerBatch))
             - timestepsPerBatch,
             timestepsPerBatch,
         ):
+            # and here's where the dataset gets its values from!
             yield pr[i : i + timestepsPerBatch, :], pr[
                 i + timestepsPerBatch : i + (2 * timestepsPerBatch), :
             ]
+
+
+def determineSizeOfSet():
+    """
+    this is a copy-paste of our generator, but instead of yielding, we
+    determine the size of our training set
+    """
+
+    size = 0
+
+    for _, v in list_of_files.items():
+        try:
+            pr = numpyFromFile(v)
+        except EOFError:
+            print("EOFError in " + v)
+            continue
+        except mido.KeySignatureError:
+            print("KeySignatureError in " + v)
+            continue
+
+        # need some light preprocessing:
+        # we want this organized in the shape [length, 128]
+        pr = np.swapaxes(pr, axis1=0, axis2=1)
+        # not sure if this is the right scaling factor; do we want our inputs
+        # [-1,1] or [0,1]?
+        pr = pr / 256
+        # let's also return as float16s
+        pr = pr.astype(np.float16)
+
+        # we want to return x and y of a certain size, and offset from one
+        # another. We use yield for this, a function I was unfamiliar with!
+        for i in range(
+            0,
+            (timestepsPerBatch * (pr.shape[0] // timestepsPerBatch))
+            - timestepsPerBatch,
+            timestepsPerBatch,
+        ):
+            size += 1
+    return size
 
 
 if __name__ == "__main__":
@@ -73,13 +128,21 @@ if __name__ == "__main__":
         tf.data.Dataset.from_generator(
             getNextMusicChunk, output_signature=returnSignature
         )
-        .apply(tf.data.experimental.assert_cardinality(numberOfBatches))
+        .apply(tf.data.experimental.assert_cardinality(datasetSize))
         .prefetch(batchSize * 2)
     )
 
-    for x, y in dataset.take(111):
+    # get some characteristics of our dataset
+    for x, y in dataset.take(1):
+        # determine shape returned
         print(f"x shape: {x.shape}, y shape: {y.shape}")
         allData = np.concatenate((x, y), -1)
+        # and range:
         print(f"max: {np.max(allData)}, min: {np.min(allData)}")
+        # if taking more than one, might be better to see range above threshold:
         # if np.max(allData) > 1:
         #    print("bigger than 1")
+
+    # see the whole size (note: only do this when determineSizeOfSet is updated)
+    # print(f"size of whole dataset: {determineSizeOfSet()}")
+    # size of whole dataset: 46581
