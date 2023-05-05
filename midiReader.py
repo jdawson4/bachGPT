@@ -54,7 +54,7 @@ def getNextMusicChunk():
             print("KeySignatureError in " + v)
             continue
         pr = np.swapaxes(pr, axis1=0, axis2=1)
-        pr = (pr / 256)
+        pr = pr / 256
         pr = pr.astype(np.float16)
         for i in range(
             0,
@@ -77,9 +77,9 @@ if __name__ == "__main__":
         .prefetch(batchSize * 2)
     )
 
-    for x,y in dataset.take(111):
+    for x, y in dataset.take(111):
         print(f"x shape: {x.shape}, y shape: {y.shape}")
-        allData = np.concatenate((x,y), - 1)
+        allData = np.concatenate((x, y), -1)
         print(f"max: {np.max(allData)}, min: {np.min(allData)}")
-        #if np.max(allData) > 1:
+        # if np.max(allData) > 1:
         #    print("bigger than 1")
