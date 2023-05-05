@@ -25,7 +25,8 @@ def trainLoop():
 
     valDataset = (
         tf.data.Dataset.from_generator(
-            lambda: getNextMusicChunk(valMidisDirectory), output_signature=(returnSignature, returnSignature)
+            lambda: getNextMusicChunk(valMidisDirectory),
+            output_signature=(returnSignature, returnSignature),
         )
         .apply(tf.data.experimental.assert_cardinality(valDatasetSize))
         .prefetch(batchSize * 2)
