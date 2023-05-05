@@ -6,7 +6,7 @@
 # into train and val, and the main .fit() function.
 
 from arch import *
-from pullArray import *
+from midiReader import *
 import gc
 
 keras.mixed_precision.set_global_policy("mixed_float16")

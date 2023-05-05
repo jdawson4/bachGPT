@@ -1,10 +1,9 @@
 # Author: Jacob Dawson
 #
 # This file is dedicated to reading our midi files into a format
-# (a numpy array) for training our machine learning model. Depending on how
-# fast we can do this, it might be better to save this read data to its own
-# file, or perhaps to just return it/a generator for training the model, I
-# haven't quite decided yet.
+# (a numpy array) for training our machine learning model. Because of our
+# limitations, I've found that it's best to use tensorflow's Dataset utilities
+# to load and preprocess our midis
 #
 # In any case, I've poked around the internet and I've copied some people's
 # code, but I was unsure of permissions, so I've removed that. In the end,
@@ -55,7 +54,7 @@ def getNextMusicChunk():
             print("KeySignatureError in " + v)
             continue
         pr = np.swapaxes(pr, axis1=0, axis2=1)
-        # pr = (batchedData / (maxVal / 2)) - 1
+        pr = (pr / 256)
         pr = pr.astype(np.float16)
         for i in range(
             0,
@@ -78,5 +77,9 @@ if __name__ == "__main__":
         .prefetch(batchSize * 2)
     )
 
-    for x,y in dataset.take(1):
+    for x,y in dataset.take(111):
         print(f"x shape: {x.shape}, y shape: {y.shape}")
+        allData = np.concatenate((x,y), - 1)
+        print(f"max: {np.max(allData)}, min: {np.min(allData)}")
+        #if np.max(allData) > 1:
+        #    print("bigger than 1")

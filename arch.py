@@ -88,7 +88,7 @@ def attentionModel(inputShape):
     a10 = attnLayer(input=a9, layerCounter=layerCounter, kernelInit=init)
 
     output = keras.layers.Dense(
-        inputShape[1], activation="tanh", kernel_initializer=init
+        inputShape[1], activation="selu", kernel_initializer=init
     )(a10)
     # output = keras.layers.Rescaling(300, offset=300)(output)
 
