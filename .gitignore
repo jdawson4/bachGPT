@@ -11,3 +11,6 @@ val_midis/
 ckpts/
 network/
 modelWeights
+
+# let's not save our outputted predictions yet
+prediction.mid
