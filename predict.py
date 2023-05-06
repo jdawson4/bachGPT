@@ -14,13 +14,13 @@ model = attentionModel((timestepsPerBatch, 128))
 
 # and compile... this doesn't actually matter because we aren't training
 model.compile(
-    optimizer='adam',
-    loss='mse',
-    metrics=['mae'],
+    optimizer="adam",
+    loss="mse",
+    metrics=["mae"],
 )
 
 # need to set built as true
-model.built=True
+model.built = True
 
 # and finally load our weights
 model.load_weights(modelSaveLocation)
@@ -29,10 +29,10 @@ model.load_weights(modelSaveLocation)
 predictions = []
 lastPrediction = np.zeros((timestepsPerBatch, 128), dtype=np.float16)
 for i in range(numPredictions):
-    #print("prediction", i)
+    # print("prediction", i)
     prediction = model(tf.expand_dims(lastPrediction, axis=0))[0]
     predictions.append(prediction)
-    #print(f"lastPrediction shape: {lastPrediction.shape}, prediction shape: {prediction.shape}")
+    # print(f"lastPrediction shape: {lastPrediction.shape}, prediction shape: {prediction.shape}")
     lastPrediction = prediction
 predictions = np.concatenate(predictions, axis=0)
 predictions = predictions * 256
