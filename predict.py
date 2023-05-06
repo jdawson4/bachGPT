@@ -47,6 +47,8 @@ predictions = predictions * 256
 predictions = predictions.astype(np.uint16)
 
 print("Writing predictions to", predictionFile)
+# probably need to do more work here to get the timings correct, realizing now
+# that I don't entirely know how they were encoded.
 outputMidi = pretty_midi.PrettyMIDI()
 piano_program = pretty_midi.instrument_name_to_program("Acoustic Grand Piano")
 piano = pretty_midi.Instrument(program=piano_program)
