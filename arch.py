@@ -17,8 +17,6 @@ learnRate = 0.001
 momentum = 0.9
 epochInterval = 5
 epochs = 25
-datasetSize = 44898
-valDatasetSize = 1683
 
 
 def attnLayer(

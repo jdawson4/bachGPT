@@ -25,6 +25,13 @@ from arch import *
 midisDirectory = "midis"
 valMidisDirectory = "val_midis"
 
+# these can be determined using the (maybe commented out) script in "main".
+# I've done some experimenting and apparently you MUST set the cardinality
+# of your datasets--frustrating, because I'd rather not hardcode this based
+# on our dataset. Oh well.
+datasetSize = 44898
+valDatasetSize = 1683
+
 
 def numpyFromFile(filename):
     """
