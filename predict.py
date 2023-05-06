@@ -8,7 +8,7 @@ import pretty_midi
 from arch import *
 
 # this determines the length of the song made:
-numPredictions = 128
+numPredictions = 32
 
 predictionFile = "prediction.mid"
 
@@ -33,6 +33,7 @@ model.load_weights(modelSaveLocation)
 # predict!
 print("Making predictions")
 predictions = []
+# TODO: probably a bad "seed crystal" to start on.
 lastPrediction = np.zeros((timestepsPerBatch, 128), dtype=np.float16)
 for i in range(numPredictions):
     # print("prediction", i)
