@@ -17,6 +17,7 @@ learnRate = 0.001
 momentum = 0.9
 epochInterval = 5
 epochs = 25
+modelSaveLocation = "modelWeights"
 
 
 def attnLayer(

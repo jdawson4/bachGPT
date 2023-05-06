@@ -10,3 +10,4 @@ val_midis/
 # ignore the checkpoints and saved models:
 ckpts/
 network/
+modelWeights
