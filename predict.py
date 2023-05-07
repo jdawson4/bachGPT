@@ -46,6 +46,9 @@ print("Postprocessing predictions")
 predictions = np.concatenate(predictions, axis=0)
 predictions = predictions * 256
 predictions = predictions.astype(np.uint16)
+# apparently our piano_roll_to_pretty_midi function takes an object of the
+# shape [128, length]; we need to reorder our data:
+predictions = np.swapaxes(predictions, axis1=1, axis2=0)
 
 print("Writing predictions to", predictionFile)
 # this is my first attempt, but it's pretty bad at reflecting how timings work
