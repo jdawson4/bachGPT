@@ -67,7 +67,9 @@ outputMidi.instruments.append(piano)
 outputMidi.write(predictionFile)"""
 
 
-# here's some code I found in the pretty_midi repo that ought to wokr better
+# here's some code I found in the pretty_midi repo that ought to work better.
+# originally found here:
+# github.com/craffel/pretty-midi/blob/main/examples/reverse_pianoroll.py
 def piano_roll_to_pretty_midi(piano_roll, fs=100, program=0):
     """Convert a Piano Roll array into a PrettyMidi object
      with a single instrument.
