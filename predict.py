@@ -8,7 +8,7 @@ import pretty_midi
 from arch import *
 
 # this determines the length of the song made:
-numPredictions = 32
+numPredictions = 128
 
 predictionFile = "prediction.mid"
 
