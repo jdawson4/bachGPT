@@ -91,13 +91,14 @@ def getNextMusicChunk(directory=midisDirectory):
             ]
 
 
-def determineSizeOfSet(directory=midisDirectory):
+def determineSetCharacteristics(directory=midisDirectory):
     """
     this is a copy-paste of our generator, but instead of yielding, we
     determine the size of our training set
     """
 
     size = 0
+    maxNote = 0.0
 
     if not os.path.isdir(directory):
         raise Exception(f"No directory found at {directory}")
@@ -117,6 +118,8 @@ def determineSizeOfSet(directory=midisDirectory):
         except mido.KeySignatureError:
             # print("KeySignatureError in " + v)
             continue
+        if np.max(pr) > maxNote:
+            maxNote = np.max(pr)
 
         # need some light preprocessing:
         # we want this organized in the shape [length, 128]
@@ -136,7 +139,8 @@ def determineSizeOfSet(directory=midisDirectory):
             timestepsPerBatch,
         ):
             size += 1
-    return size
+    print(f"size of dataset: {size}")
+    print(f"max of dataset: {maxNote}")
 
 
 if __name__ == "__main__":
@@ -171,9 +175,9 @@ if __name__ == "__main__":
         allData = np.concatenate((x, y), -1)
         print(f"val dataset returns: {allData.shape}")
 
-    # see the whole size (note: only do this when determineSizeOfSet is updated)
-    # print(f"size of train dataset: {determineSizeOfSet(midisDirectory)}")
-    # size of whole dataset: 44898
-
-    # print(f"size of validation dataset: {determineSizeOfSet(valMidisDirectory)}")
+    # get some stats about our data:
+    determineSetCharacteristics()
+    determineSetCharacteristics(valMidisDirectory)
+    # size of train dataset: 44898
     # size of validation dataset: 1683
+    # seems like the max value for midis is 564, which seems strange
