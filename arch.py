@@ -59,9 +59,8 @@ def attentionModel(inputShape):
     init = keras.initializers.RandomNormal(seed=seed)
 
     input = keras.layers.Input(shape=inputShape, dtype=tf.float16)
-    # scale = keras.layers.Rescaling(1 / 300, offset=-1)(input)
     # embed = keras_nlp.layers.PositionEmbedding(timestepsPerBatch, initializer=init)(
-    #    scale
+    #    input
     # )
 
     layerCounter += 1
@@ -88,9 +87,8 @@ def attentionModel(inputShape):
     a10 = attnLayer(input=a9, layerCounter=layerCounter, kernelInit=init)
 
     output = keras.layers.Dense(
-        inputShape[1], activation="selu", kernel_initializer=init
+        inputShape[1], activation=None, kernel_initializer=init
     )(a10)
-    # output = keras.layers.Rescaling(300, offset=300)(output)
 
     return keras.Model(inputs=input, outputs=output, name="attentionModel")
 

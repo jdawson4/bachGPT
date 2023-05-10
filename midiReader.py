@@ -31,6 +31,8 @@ valMidisDirectory = "val_midis"
 # on our dataset. Oh well.
 datasetSize = 44898
 valDatasetSize = 1683
+midiStandardDeviation = 13.4
+midiMean = 2.05
 
 
 def numpyFromFile(filename):
@@ -71,9 +73,8 @@ def getNextMusicChunk(directory=midisDirectory):
         # need some light preprocessing:
         # we want this organized in the shape [length, 128]
         pr = np.swapaxes(pr, axis1=0, axis2=1)
-        # not sure if this is the right scaling factor; do we want our inputs
-        # [-1,1] or [0,1]?
-        pr = pr / 256
+        # to scale, we'll demean and divide by standard deviation:
+        pr = (pr - midiMean) / midiStandardDeviation
         # let's also return as float16s
         pr = pr.astype(np.float16)
 
@@ -99,6 +100,8 @@ def determineSetCharacteristics(directory=midisDirectory):
 
     size = 0
     maxNote = 0.0
+    means = []
+    stdevs = []
 
     if not os.path.isdir(directory):
         raise Exception(f"No directory found at {directory}")
@@ -118,15 +121,18 @@ def determineSetCharacteristics(directory=midisDirectory):
         except mido.KeySignatureError:
             # print("KeySignatureError in " + v)
             continue
+        
+        # record characteristics
         if np.max(pr) > maxNote:
             maxNote = np.max(pr)
+        means.append(np.mean(pr))
+        stdevs.append(np.std(pr))
 
         # need some light preprocessing:
         # we want this organized in the shape [length, 128]
         pr = np.swapaxes(pr, axis1=0, axis2=1)
-        # not sure if this is the right scaling factor; do we want our inputs
-        # [-1,1] or [0,1]?
-        pr = pr / 256
+        # to scale, we'll demean and divide by standard deviation:
+        pr = (pr - midiMean) / midiStandardDeviation
         # let's also return as float16s
         pr = pr.astype(np.float16)
 
@@ -139,8 +145,13 @@ def determineSetCharacteristics(directory=midisDirectory):
             timestepsPerBatch,
         ):
             size += 1
+
+    # these aren't actually the mean and standard deviation but they're close
+    mean = np.mean(np.array(means))
+    stdev = np.mean(np.array(stdevs))
     print(f"size of dataset: {size}")
     print(f"max of dataset: {maxNote}")
+    print(f"mean: {mean}, standard deviation: {stdev}\n")
 
 
 if __name__ == "__main__":
@@ -181,3 +192,4 @@ if __name__ == "__main__":
     # size of train dataset: 44898
     # size of validation dataset: 1683
     # seems like the max value for midis is 564, which seems strange
+    # the approximate mean is 2.05, standard deviation is around 13.4

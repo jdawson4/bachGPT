@@ -8,7 +8,7 @@ import pretty_midi
 import os
 from random import choice
 from arch import *
-from midiReader import numpyFromFile, midisDirectory
+from midiReader import numpyFromFile, midisDirectory, midiMean, midiStandardDeviation
 
 # this determines the length of the song made:
 numPredictions = 128
@@ -67,7 +67,7 @@ for i in range(numPredictions):
 
 print("Postprocessing predictions")
 predictions = np.concatenate(predictions, axis=0)
-predictions = predictions * 256
+predictions = (predictions * midiStandardDeviation) + midiMean
 predictions = predictions.astype(np.uint16)
 # apparently our piano_roll_to_pretty_midi function takes an object of the
 # shape [128, length]; we need to reorder our data:
