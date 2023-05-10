@@ -5,7 +5,10 @@
 import numpy as np
 import tensorflow as tf
 import pretty_midi
+import os
+from random import choice
 from arch import *
+from midiReader import numpyFromFile, midisDirectory
 
 # this determines the length of the song made:
 numPredictions = 128
@@ -33,13 +36,33 @@ model.load_weights(modelSaveLocation)
 # predict!
 print("Making predictions")
 predictions = []
-# TODO: probably a bad "seed crystal" to start on.
-lastPrediction = np.zeros((timestepsPerBatch, 128), dtype=np.float16)
+# "Seed crystal" to start on. Zeroes apparently doesn't work all that well, it
+# appears that the network will just keep guessing zeroes--fair enough, I guess.
+# lastPrediction = np.zeros((timestepsPerBatch, 128), dtype=np.float16)
+#
+# as our "seed", we'll choose a random midi from our set, and then only the
+# first chunk
+if not os.path.isdir(midisDirectory):
+    raise Exception(f"No directory found at {midisDirectory}")
+
+list_of_files = []
+for dirpath, _, filenames in os.walk(midisDirectory):
+    for filename in filenames:
+        if filename.endswith(".mid"):
+            list_of_files.append(os.sep.join([dirpath, filename]))
+randomMidi = choice(list_of_files)
+print(f"Seeding prediction with first chunk of {randomMidi}")
+lastPrediction = numpyFromFile(randomMidi)
+lastPrediction = np.swapaxes(lastPrediction, axis1=0, axis2=1)
+lastPrediction = lastPrediction[0:timestepsPerBatch, :]
+lastPrediction = lastPrediction / 256
+lastPrediction = lastPrediction.astype(np.float16)
 for i in range(numPredictions):
     # print("prediction", i)
     prediction = model(tf.expand_dims(lastPrediction, axis=0))[0]
     predictions.append(prediction)
     # print(f"lastPrediction shape: {lastPrediction.shape}, prediction shape: {prediction.shape}")
+    # print(f"lastPrediction min, max: {np.min(lastPrediction)}, {np.max(lastPrediction)}; prediction min, max: {np.min(prediction)}, {np.max(prediction)}")
     lastPrediction = prediction
 
 print("Postprocessing predictions")
