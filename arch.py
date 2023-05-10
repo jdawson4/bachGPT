@@ -16,7 +16,7 @@ batchSize = 64
 learnRate = 0.001
 momentum = 0.9
 epochInterval = 5
-epochs = 25
+epochs = 15
 modelSaveLocation = "modelWeights"
 
 
