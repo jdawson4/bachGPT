@@ -9,11 +9,11 @@ from arch import *
 from midiReader import *
 import gc
 
-keras.mixed_precision.set_global_policy("mixed_float16")
+# keras.mixed_precision.set_global_policy("mixed_float16")
 
 
 def trainLoop():
-    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float16)
+    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float32)
     dataset = (
         tf.data.Dataset.from_generator(
             getNextMusicChunk, output_signature=(returnSignature, returnSignature)

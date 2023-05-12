@@ -38,7 +38,7 @@ print("Making predictions")
 predictions = []
 # "Seed crystal" to start on. Zeroes apparently doesn't work all that well, it
 # appears that the network will just keep guessing zeroes--fair enough, I guess.
-# lastPrediction = np.zeros((timestepsPerBatch, 128), dtype=np.float16)
+# lastPrediction = np.zeros((timestepsPerBatch, 128), dtype=np.float32)
 #
 # as our "seed", we'll choose a random midi from our set, and then only the
 # first chunk
@@ -54,9 +54,9 @@ randomMidi = choice(list_of_files)
 print(f"Seeding prediction with first chunk of {randomMidi}")
 lastPrediction = numpyFromFile(randomMidi)
 lastPrediction = np.swapaxes(lastPrediction, axis1=0, axis2=1)
+lastPrediction = lastPrediction.astype(np.float32)
 lastPrediction = lastPrediction[0:timestepsPerBatch, :]
-lastPrediction = lastPrediction / 256
-lastPrediction = lastPrediction.astype(np.float16)
+lastPrediction = (lastPrediction - midiMean) / midiStandardDeviation
 for i in range(numPredictions):
     # print("prediction", i)
     prediction = model(tf.expand_dims(lastPrediction, axis=0))[0]

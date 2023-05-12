@@ -12,7 +12,7 @@ from tensorflow import keras
 
 seed = 7
 timestepsPerBatch = 512
-batchSize = 64
+batchSize = 32
 learnRate = 0.001
 momentum = 0.9
 epochInterval = 5
@@ -28,7 +28,7 @@ def attnLayer(
     kDim=32,
     out_shape=128,
     residual=True,
-    dropout=0.33,
+    dropout=0.5,
 ):
     output = keras.layers.LayerNormalization()(input)
     output = keras.layers.MultiHeadAttention(
@@ -58,7 +58,7 @@ def attentionModel(inputShape):
     layerCounter = 0
     init = keras.initializers.RandomNormal(seed=seed)
 
-    input = keras.layers.Input(shape=inputShape, dtype=tf.float16)
+    input = keras.layers.Input(shape=inputShape, dtype=tf.float32)
     # embed = keras_nlp.layers.PositionEmbedding(timestepsPerBatch, initializer=init)(
     #    input
     # )

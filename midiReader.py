@@ -73,10 +73,9 @@ def getNextMusicChunk(directory=midisDirectory):
         # need some light preprocessing:
         # we want this organized in the shape [length, 128]
         pr = np.swapaxes(pr, axis1=0, axis2=1)
+        pr = pr.astype(np.float32)
         # to scale, we'll demean and divide by standard deviation:
         pr = (pr - midiMean) / midiStandardDeviation
-        # let's also return as float16s
-        pr = pr.astype(np.float16)
 
         # we want to return x and y of a certain size, and offset from one
         # another. We use yield for this, a function I was unfamiliar with!
@@ -121,7 +120,7 @@ def determineSetCharacteristics(directory=midisDirectory):
         except mido.KeySignatureError:
             # print("KeySignatureError in " + v)
             continue
-        
+
         # record characteristics
         if np.max(pr) > maxNote:
             maxNote = np.max(pr)
@@ -131,10 +130,11 @@ def determineSetCharacteristics(directory=midisDirectory):
         # need some light preprocessing:
         # we want this organized in the shape [length, 128]
         pr = np.swapaxes(pr, axis1=0, axis2=1)
+        pr = pr.astype(np.float32)
         # to scale, we'll demean and divide by standard deviation:
         pr = (pr - midiMean) / midiStandardDeviation
         # let's also return as float16s
-        pr = pr.astype(np.float16)
+        print(f"contains nans: {np.any(np.isnan(pr))}")
 
         # we want to return x and y of a certain size, and offset from one
         # another. We use yield for this, a function I was unfamiliar with!
@@ -155,7 +155,7 @@ def determineSetCharacteristics(directory=midisDirectory):
 
 
 if __name__ == "__main__":
-    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float16)
+    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float32)
     dataset = (
         tf.data.Dataset.from_generator(
             getNextMusicChunk, output_signature=(returnSignature, returnSignature)
