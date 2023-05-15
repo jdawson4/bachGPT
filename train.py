@@ -13,7 +13,7 @@ import gc
 
 
 def trainLoop():
-    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float32)
+    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float16)
     dataset = (
         tf.data.Dataset.from_generator(
             getNextMusicChunk, output_signature=(returnSignature, returnSignature)

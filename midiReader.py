@@ -73,7 +73,7 @@ def getNextMusicChunk(directory=midisDirectory):
         # need some light preprocessing:
         # we want this organized in the shape [length, 128]
         pr = np.swapaxes(pr, axis1=0, axis2=1)
-        pr = pr.astype(np.float32)
+        pr = pr.astype(np.float16)
         # to scale, we'll demean and divide by standard deviation:
         pr = (pr - midiMean) / midiStandardDeviation
 
@@ -130,7 +130,7 @@ def determineSetCharacteristics(directory=midisDirectory):
         # need some light preprocessing:
         # we want this organized in the shape [length, 128]
         pr = np.swapaxes(pr, axis1=0, axis2=1)
-        pr = pr.astype(np.float32)
+        pr = pr.astype(np.float16)
         # to scale, we'll demean and divide by standard deviation:
         pr = (pr - midiMean) / midiStandardDeviation
         # let's also return as float16s
@@ -155,7 +155,7 @@ def determineSetCharacteristics(directory=midisDirectory):
 
 
 if __name__ == "__main__":
-    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float32)
+    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float16)
     dataset = (
         tf.data.Dataset.from_generator(
             getNextMusicChunk, output_signature=(returnSignature, returnSignature)
