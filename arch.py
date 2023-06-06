@@ -11,9 +11,9 @@ from tensorflow import keras
 # import keras_nlp
 
 seed = 7
-timestepsPerBatch = 512
-batchSize = 48
-learnRate = 0.0075
+timestepsPerBatch = 256
+batchSize = 16
+learnRate = 0.005
 momentum = 0.9
 epochInterval = 5
 epochs = 25
@@ -25,8 +25,8 @@ def attnLayer(
     kernelInit,
     layerCounter,
     heads=4,
-    kDim=32,
-    out_shape=128,
+    kDim=16,
+    out_shape=64,
     residual=True,
     dropout=0.25,
 ):
@@ -64,31 +64,14 @@ def attentionModel(inputShape):
     # )
 
     layerCounter += 1
-    a1 = attnLayer(
-        input=input, layerCounter=layerCounter, kernelInit=init, residual=False
-    )
-    layerCounter += 1
-    a2 = attnLayer(input=a1, layerCounter=layerCounter, kernelInit=init, residual=False)
-    layerCounter += 1
-    a3 = attnLayer(input=a2, layerCounter=layerCounter, kernelInit=init)
-    layerCounter += 1
-    a4 = attnLayer(input=a3, layerCounter=layerCounter, kernelInit=init)
-    layerCounter += 1
-    a5 = attnLayer(input=a4, layerCounter=layerCounter, kernelInit=init)
-    layerCounter += 1
-    a6 = attnLayer(input=a5, layerCounter=layerCounter, kernelInit=init)
-    layerCounter += 1
-    a7 = attnLayer(input=a6, layerCounter=layerCounter, kernelInit=init)
-    layerCounter += 1
-    a8 = attnLayer(input=a7, layerCounter=layerCounter, kernelInit=init)
-    layerCounter += 1
-    a9 = attnLayer(input=a8, layerCounter=layerCounter, kernelInit=init)
-    layerCounter += 1
-    a10 = attnLayer(input=a9, layerCounter=layerCounter, kernelInit=init)
+    output = attnLayer(input=input, layerCounter=layerCounter, kernelInit=init, residual=False)
+    for _ in range(49):
+        layerCounter += 1
+        output = attnLayer(input=output, layerCounter=layerCounter, kernelInit=init)
 
     output = keras.layers.Dense(
         inputShape[1], activation=None, kernel_initializer=init
-    )(a10)
+    )(output)
 
     return keras.Model(inputs=input, outputs=output, name="attentionModel")
 

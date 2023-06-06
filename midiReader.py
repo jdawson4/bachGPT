@@ -29,8 +29,8 @@ valMidisDirectory = "val_midis"
 # I've done some experimenting and apparently you MUST set the cardinality
 # of your datasets--frustrating, because I'd rather not hardcode this based
 # on our dataset. Oh well.
-datasetSize = 44898
-valDatasetSize = 1683
+datasetSize = 89796
+valDatasetSize = 3366
 midiStandardDeviation = 13.4
 midiMean = 2.05
 
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     # get some stats about our data:
     determineSetCharacteristics()
     determineSetCharacteristics(valMidisDirectory)
-    # size of train dataset: 44898
-    # size of validation dataset: 1683
+    # size of train dataset: 89796
+    # size of validation dataset: 3366
     # seems like the max value for midis is 564, which seems strange
     # the approximate mean is 2.05, standard deviation is around 13.4
