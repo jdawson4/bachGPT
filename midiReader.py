@@ -29,8 +29,8 @@ valMidisDirectory = "val_midis"
 # I've done some experimenting and apparently you MUST set the cardinality
 # of your datasets--frustrating, because I'd rather not hardcode this based
 # on our dataset. Oh well.
-datasetSize = 89796
-valDatasetSize = 3366
+datasetSize = 91999
+valDatasetSize = 3412
 midiStandardDeviation = 13.4
 midiMean = 2.05
 
@@ -134,7 +134,8 @@ def determineSetCharacteristics(directory=midisDirectory):
         # to scale, we'll demean and divide by standard deviation:
         pr = (pr - midiMean) / midiStandardDeviation
         # let's also return as float16s
-        print(f"contains nans: {np.any(np.isnan(pr))}")
+
+        # print(f"contains nans: {np.any(np.isnan(pr))}")
 
         # we want to return x and y of a certain size, and offset from one
         # another. We use yield for this, a function I was unfamiliar with!
@@ -192,7 +193,7 @@ if __name__ == "__main__":
     # get some stats about our data:
     determineSetCharacteristics()
     determineSetCharacteristics(valMidisDirectory)
-    # size of train dataset: 89796
-    # size of validation dataset: 3366
+    # size of train dataset: 91999
+    # size of validation dataset: 3412
     # seems like the max value for midis is 564, which seems strange
     # the approximate mean is 2.05, standard deviation is around 13.4
