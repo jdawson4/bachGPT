@@ -155,10 +155,13 @@ def determineSetCharacteristics(directory=midisDirectory):
 
 
 if __name__ == "__main__":
-    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float16)
+    returnSignature = tf.TensorSpec(
+        shape=(timestepsPerBatch, 128), dtype=tf.float16
+    )
     dataset = (
         tf.data.Dataset.from_generator(
-            getNextMusicChunk, output_signature=(returnSignature, returnSignature)
+            getNextMusicChunk,
+            output_signature=(returnSignature, returnSignature),
         )
         .apply(tf.data.experimental.assert_cardinality(datasetSize))
         .prefetch(batchSize * 2)

@@ -8,7 +8,12 @@ import pretty_midi
 import os
 from random import choice
 from arch import *
-from midiReader import numpyFromFile, midisDirectory, midiMean, midiStandardDeviation
+from midiReader import (
+    numpyFromFile,
+    midisDirectory,
+    midiMean,
+    midiStandardDeviation,
+)
 
 # this determines the length of the song made:
 numPredictions = 128

@@ -13,10 +13,13 @@ import gc
 
 
 def trainLoop():
-    returnSignature = tf.TensorSpec(shape=(timestepsPerBatch, 128), dtype=tf.float16)
+    returnSignature = tf.TensorSpec(
+        shape=(timestepsPerBatch, 128), dtype=tf.float16
+    )
     dataset = (
         tf.data.Dataset.from_generator(
-            getNextMusicChunk, output_signature=(returnSignature, returnSignature)
+            getNextMusicChunk,
+            output_signature=(returnSignature, returnSignature),
         )
         .apply(tf.data.experimental.assert_cardinality(datasetSize))
         .prefetch(batchSize * 2)
@@ -53,7 +56,9 @@ def trainLoop():
         def on_epoch_begin(self, epoch, logs=None):
             if (epoch % self.epoch_interval) == 0:
                 self.model.save_weights(
-                    ckptsDir + "/ckpt" + str(epoch), overwrite=True, save_format="h5"
+                    ckptsDir + "/ckpt" + str(epoch),
+                    overwrite=True,
+                    save_format="h5",
                 )
                 # self.model.save("network", overwrite=True)
 

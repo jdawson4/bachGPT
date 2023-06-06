@@ -51,7 +51,9 @@ def attnLayer(
     output = keras.layers.Activation("selu")(output)
     output = keras.layers.Dropout(dropout)(output)
 
-    return keras.Model(inputs=input, outputs=output, name=f"block{layerCounter}")(input)
+    return keras.Model(
+        inputs=input, outputs=output, name=f"block{layerCounter}"
+    )(input)
 
 
 def attentionModel(inputShape):
@@ -64,10 +66,14 @@ def attentionModel(inputShape):
     # )
 
     layerCounter += 1
-    output = attnLayer(input=input, layerCounter=layerCounter, kernelInit=init, residual=False)
+    output = attnLayer(
+        input=input, layerCounter=layerCounter, kernelInit=init, residual=False
+    )
     for _ in range(49):
         layerCounter += 1
-        output = attnLayer(input=output, layerCounter=layerCounter, kernelInit=init)
+        output = attnLayer(
+            input=output, layerCounter=layerCounter, kernelInit=init
+        )
 
     output = keras.layers.Dense(
         inputShape[1], activation=None, kernel_initializer=init
